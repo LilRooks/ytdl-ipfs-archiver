@@ -2,6 +2,7 @@ package app
 
 import (
 	"flag"
+	"fmt"
 	"io"
 )
 
@@ -27,5 +28,8 @@ func Run(args []string, stdout io.Writer) ErrorCode {
 		return ErrorCode{Error: err, Code: -1}
 	}
 	ytdlOptions := flags.Args()
+	for _, name := range ytdlOptions[1:] {
+		fmt.Fprintf(stdout, "Hi %s", name)
+	}
 	return ErrorCode{Error: nil, Code: 0}
 }
