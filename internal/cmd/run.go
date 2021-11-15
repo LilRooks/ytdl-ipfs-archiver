@@ -24,8 +24,8 @@ func Run(args []string, stdout io.Writer) ErrorCode {
 	flags.StringVar(&tablePath, "tab", "./table.edn", "path to the table file to use")
 
 	if err := flags.Parse(args[1:]); err != nil {
-		return ErrorCode{Error: err, code: -1}
+		return ErrorCode{Error: err, Code: -1}
 	}
 	ytdlOptions := flags.Args()
-	return nil
+	return ErrorCode{Error: nil, Code: 0}
 }
