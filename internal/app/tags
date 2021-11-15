@@ -1,5 +1,4 @@
 !_TAG_FILE_SORTED	2	/0=unsorted, 1=sorted, 2=foldcase/
-app	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/errors.go	/^package app$/;"	p	language:Go
 app	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^package app$/;"	p	language:Go
 confPath	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^var confPath string$/;"	v	language:Go
 errorConfig	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^	errorConfig$/;"	c	language:Go

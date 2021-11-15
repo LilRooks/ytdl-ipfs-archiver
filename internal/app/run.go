@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/LilRooks/ytdl-ipfs-archiver/internal/pkg/config"
+	"github.com/LilRooks/ytdl-ipfs-archiver/internal/pkg/ytdl"
 )
 
 var ytdlPath string
@@ -40,7 +41,8 @@ func Run(args []string, stdout io.Writer) (error, int) {
 	if len(ytdlPath) == 0 {
 		ytdlPath = configs.Binary
 	}
-	if err := ytdl.CheckBinary(ytdlPath); err != nil {
+	err, ytdlPath = ytdl.ParsePath(ytdlPath)
+	if err != nil {
 		return err, errorYTDL
 	}
 
