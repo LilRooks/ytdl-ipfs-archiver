@@ -8,6 +8,7 @@ import (
 
 type ConfigSet struct {
 	Binary string
+	Token  string
 }
 
 // Parse parses the configuration given at path.

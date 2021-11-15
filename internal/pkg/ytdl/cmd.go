@@ -1,28 +1,34 @@
 package ytdl
 
 import (
-	"log"
 	"os/exec"
 	"unicode/utf8"
 )
 
+// GetIdentifiers gets the identifying characteristics of the file to be downloaded
 func GetIdentifiers(binary string, args []string) (error, string, string) {
 	err, id := ReadCommand(binary, append(args, "--get-id"))
 	if err != nil {
 		return err, "", ""
 	}
 	err, format := ReadCommand(binary, append(args, "--get-format"))
+	return err, id, format
+}
+
+func Download(binary string, args []string) (error, string) {
+	err, filename := ReadCommand(binary, append(args, "--get-filename"))
 	if err != nil {
-		return err, "", ""
+		return err, ""
 	}
 
-	return nil, id, format
+	err, _ = ReadCommand(binary, args)
+	return err, filename
 }
 
 func ReadCommand(binary string, args []string) (error, string) {
 	out, err := exec.Command(binary, args...).Output()
 	if err != nil {
-		log.Fatal(err)
+		return err, ""
 	}
 
 	strOut := string(out)

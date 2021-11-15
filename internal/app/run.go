@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"fmt"
@@ -10,11 +11,14 @@ import (
 	"github.com/LilRooks/ytdl-ipfs-archiver/internal/pkg/config"
 	"github.com/LilRooks/ytdl-ipfs-archiver/internal/pkg/table"
 	"github.com/LilRooks/ytdl-ipfs-archiver/internal/pkg/ytdl"
+	"github.com/web3-storage/go-w3s-client"
 )
 
-var ytdlPath string
-var confPath string
-var tablPath string
+var (
+	ytdlPath string
+	confPath string
+	tablPath string
+)
 
 const (
 	errorGeneric = iota
@@ -65,16 +69,49 @@ func Run(args []string, stdout io.Writer) (error, int) {
 		return err, errorYTDL
 	}
 
-	err, location = table.Fetch(tablPath, id, format)
+	_, errNotExist := os.Stat(tablPath)
+
+	err, db := table.OpenDB(tablPath)
+	if err != nil {
+		return err, errorTable
+	}
+	defer db.Close()
+
+	// Only initialized if the file did not originally exist
+	if errors.Is(errNotExist, os.ErrNotExist) {
+		fmt.Printf("[sqlite] %s doesn't exist, initializing...\n", tablPath)
+		errInit := table.InitializeTable(db)
+		if errInit != nil {
+			return errInit, errorTable
+		}
+	}
+
+	err, location = table.Fetch(db, id, format)
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return err, errorTable
 	}
-
 	// TODO This is basically debug stuff
 	fmt.Fprintf(stdout, "Binary at %s\n", ytdlPath)
 	fmt.Fprintf(stdout, "id at %s\n", id)
 	fmt.Fprintf(stdout, "format at %s\n", format)
 	fmt.Fprintf(stdout, "File at %s\n", location)
+
+	if len(location) == 0 {
+		err, filename := ytdl.Download(ytdlPath, ytdlOptions)
+		if err != nil {
+			return err, errorYTDL
+		}
+		fmt.Fprintf(stdout, "file really at %s\n", filename)
+		fmt.Fprintf(stdout, "token is %s\n", configs.Token)
+		if configs.Token == "" {
+			return err, errorIPFS
+		}
+		c, _ := w3s.NewClient(w3s.WithToken(configs.Token))
+		f, _ := os.Open(filename)
+
+		cid, _ := c.Put(context.Background(), f)
+		fmt.Printf("https://%v.ipfs.dweb.link\n", cid)
+	}
 
 	for _, name := range ytdlOptions {
 		fmt.Fprintf(stdout, "Hi %s\n", name)
