@@ -1,7 +1,0 @@
-!_TAG_FILE_SORTED	2	/0=unsorted, 1=sorted, 2=foldcase/
-cmd	/home/seven/go-extra/code/src/github.com/LilRooks/ytdl-ipfs-archiver/internal/cmd/run.go	/^package cmd$/;"	p	language:Go
-configPath	/home/seven/go-extra/code/src/github.com/LilRooks/ytdl-ipfs-archiver/internal/cmd/run.go	/^var configPath string$/;"	v	language:Go
-ErrorCode	/home/seven/go-extra/code/src/github.com/LilRooks/ytdl-ipfs-archiver/internal/cmd/run.go	/^type ErrorCode struct {$/;"	t	language:Go
-Run	/home/seven/go-extra/code/src/github.com/LilRooks/ytdl-ipfs-archiver/internal/cmd/run.go	/^func Run(args []string, stdout io.Writer) ErrorCode {$/;"	f	language:Go
-tablePath	/home/seven/go-extra/code/src/github.com/LilRooks/ytdl-ipfs-archiver/internal/cmd/run.go	/^var tablePath string$/;"	v	language:Go
-ytdlBinary	/home/seven/go-extra/code/src/github.com/LilRooks/ytdl-ipfs-archiver/internal/cmd/run.go	/^var ytdlBinary string$/;"	v	language:Go
