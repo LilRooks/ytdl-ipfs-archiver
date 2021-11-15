@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/LilRooks/ytdl-ipfs-archiver/pkg/internal/app"
+	"github.com/LilRooks/ytdl-ipfs-archiver/internal/app"
 )
 
 func main() {
-	if err := app.Run(os.Args, os.Stdout); err != nil {
+	if err := app.Run(os.Args, os.Stdout); err.Error != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error)
-		return err.Code
+		os.Exit(err.Code)
 	}
 }

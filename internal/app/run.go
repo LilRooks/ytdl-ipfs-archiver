@@ -12,6 +12,8 @@ type ErrorCode struct {
 	Code  int
 }
 
+var zeroCode ErrorCode = ErrorCode{Error: nil, Code: 0}
+
 var ytdlBinary string
 var configPath string
 var tablePath string
@@ -28,8 +30,6 @@ func Run(args []string, stdout io.Writer) ErrorCode {
 		return ErrorCode{Error: err, Code: -1}
 	}
 	ytdlOptions := flags.Args()
-	for _, name := range ytdlOptions[1:] {
-		fmt.Fprintf(stdout, "Hi %s", name)
-	}
-	return ErrorCode{Error: nil, Code: 0}
+	fmt.Fprintf(stdout, "Hi %x", len(ytdlOptions))
+	return zeroCode
 }

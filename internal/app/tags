@@ -5,3 +5,4 @@ ErrorCode	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^type E
 Run	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^func Run(args []string, stdout io.Writer) ErrorCode {$/;"	f	language:Go
 tablePath	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^var tablePath string$/;"	v	language:Go
 ytdlBinary	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^var ytdlBinary string$/;"	v	language:Go
+zeroCode	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^var zeroCode ErrorCode = ErrorCode{Error: nil, Code: 0}$/;"	v	language:Go
