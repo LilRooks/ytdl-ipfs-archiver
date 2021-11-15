@@ -90,19 +90,12 @@ func Run(args []string, stdout io.Writer) (error, int) {
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return err, errorTable
 	}
-	// TODO This is basically debug stuff
-	fmt.Fprintf(stdout, "Binary at %s\n", ytdlPath)
-	fmt.Fprintf(stdout, "id at %s\n", id)
-	fmt.Fprintf(stdout, "format at %s\n", format)
-	fmt.Fprintf(stdout, "File at %s\n", location)
 
 	if len(location) == 0 {
 		err, filename := ytdl.Download(ytdlPath, ytdlOptions)
 		if err != nil {
 			return err, errorYTDL
 		}
-		fmt.Fprintf(stdout, "file really at %s\n", filename)
-		fmt.Fprintf(stdout, "token is %s\n", configs.Token)
 		if configs.Token == "" {
 			return err, errorIPFS
 		}
