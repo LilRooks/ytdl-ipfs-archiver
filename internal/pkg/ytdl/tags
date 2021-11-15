@@ -1,5 +1,6 @@
 !_TAG_FILE_SORTED	2	/0=unsorted, 1=sorted, 2=foldcase/
-Download	/home/seven/true/build/ytdl-ipfs-archiver/internal/pkg/ytdl/cmd.go	/^func Download(binary string, args []string) (error, string) {$/;"	f	language:Go
+Download	/home/seven/true/build/ytdl-ipfs-archiver/internal/pkg/ytdl/cmd.go	/^func Download(binary string, args []string) error {$/;"	f	language:Go
+GetFilename	/home/seven/true/build/ytdl-ipfs-archiver/internal/pkg/ytdl/cmd.go	/^func GetFilename(binary string, args []string) (error, string) {$/;"	f	language:Go
 GetIdentifiers	/home/seven/true/build/ytdl-ipfs-archiver/internal/pkg/ytdl/cmd.go	/^func GetIdentifiers(binary string, args []string) (error, string, string) {$/;"	f	language:Go
 ReadCommand	/home/seven/true/build/ytdl-ipfs-archiver/internal/pkg/ytdl/cmd.go	/^func ReadCommand(binary string, args []string) (error, string) {$/;"	f	language:Go
 ytdl	/home/seven/true/build/ytdl-ipfs-archiver/internal/pkg/ytdl/cmd.go	/^package ytdl$/;"	p	language:Go

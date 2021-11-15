@@ -15,14 +15,14 @@ func GetIdentifiers(binary string, args []string) (error, string, string) {
 	return err, id, format
 }
 
-func Download(binary string, args []string) (error, string) {
+func GetFilename(binary string, args []string) (error, string) {
 	err, filename := ReadCommand(binary, append(args, "--get-filename"))
-	if err != nil {
-		return err, ""
-	}
-
-	err, _ = ReadCommand(binary, args)
 	return err, filename
+}
+
+func Download(binary string, args []string) error {
+	err, _ := ReadCommand(binary, args)
+	return err
 }
 
 func ReadCommand(binary string, args []string) (error, string) {

@@ -6,11 +6,14 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/fs"
+	"io/ioutil"
 	"os"
 
 	"github.com/LilRooks/ytdl-ipfs-archiver/internal/pkg/config"
 	"github.com/LilRooks/ytdl-ipfs-archiver/internal/pkg/table"
 	"github.com/LilRooks/ytdl-ipfs-archiver/internal/pkg/ytdl"
+	"github.com/ipfs/go-cid"
 	"github.com/web3-storage/go-w3s-client"
 )
 
@@ -60,11 +63,16 @@ func Run(args []string, stdout io.Writer) (error, int) {
 
 	// Get the keys needed for the table
 	var (
+		filename string
 		id       string
 		format   string
 		location string
 	)
 	err, id, format = ytdl.GetIdentifiers(ytdlPath, ytdlOptions)
+	if err != nil {
+		return err, errorYTDL
+	}
+	err, filename = ytdl.GetFilename(ytdlPath, ytdlOptions)
 	if err != nil {
 		return err, errorYTDL
 	}
@@ -91,24 +99,55 @@ func Run(args []string, stdout io.Writer) (error, int) {
 		return err, errorTable
 	}
 
+	cid, err := cid.Decode(location)
+	if err != nil {
+		return err, errorIPFS
+	}
+
+	c, _ := w3s.NewClient(w3s.WithToken(configs.Token))
 	if len(location) == 0 {
-		err, filename := ytdl.Download(ytdlPath, ytdlOptions)
+		err := ytdl.Download(ytdlPath, ytdlOptions)
 		if err != nil {
 			return err, errorYTDL
 		}
 		if configs.Token == "" {
 			return err, errorIPFS
 		}
-		c, _ := w3s.NewClient(w3s.WithToken(configs.Token))
 		f, _ := os.Open(filename)
 
 		cid, _ := c.Put(context.Background(), f)
-		fmt.Printf("https://%v.ipfs.dweb.link\n", cid)
+		location = cid.String()
+		err = table.Store(db, id, format, location)
+		if err != nil {
+			return err, errorTable
+		}
+	} else {
+		fmt.Fprintf(stdout, "[w3s] Getting %s\n", location)
+		res, _ := c.Get(context.Background(), cid)
+
+		// res is a http.Response with an extra method for reading IPFS UnixFS files!
+		f, fsys, _ := res.Files()
+
+		// Download directory contents
+		if d, ok := f.(fs.ReadDirFile); ok {
+			ents, _ := d.ReadDir(0)
+			for _, ent := range ents {
+				file, err := fsys.Open("/" + ent.Name())
+				if err != nil {
+					return err, errorIPFS
+				}
+				data, err := ioutil.ReadAll(file)
+				if err != nil {
+					return err, errorIPFS
+				}
+				if err := ioutil.WriteFile(filename, data, 0755); err != nil {
+					return err, errorIPFS
+				}
+			}
+		}
 	}
 
-	for _, name := range ytdlOptions {
-		fmt.Fprintf(stdout, "Hi %s\n", name)
-
-	}
+	fmt.Fprintf(stdout, "File is available locally at %s\n", filename)
+	fmt.Fprintf(stdout, "File is also available at https://%s.ipfs.dweb.link\n", location)
 	return nil, 0
 }

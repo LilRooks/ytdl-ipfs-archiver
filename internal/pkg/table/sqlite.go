@@ -51,11 +51,8 @@ func Fetch(db *sql.DB, id string, format string) (error, string) {
 // Store attempts to insert an ipfs address pointing to a file with keys being id and format given
 func Store(db *sql.DB, id string, format string, location string) error {
 	_, err := db.Exec(fmt.Sprintf(`
-	INSERT INTO ipfs(
-		id
-		format
-		location
-	) values(%s, %s, %s);`, id, format, location))
+	INSERT INTO ipfs
+	VALUES ("%s", "%s", "%s");`, id, format, location))
 	return err
 }
 
