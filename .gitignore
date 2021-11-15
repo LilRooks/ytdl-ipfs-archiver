@@ -1,2 +1,3 @@
 *.edn
 *.sqlite
+*.db

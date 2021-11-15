@@ -1,11 +1,14 @@
 package app
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/LilRooks/ytdl-ipfs-archiver/internal/pkg/config"
+	"github.com/LilRooks/ytdl-ipfs-archiver/internal/pkg/table"
 	"github.com/LilRooks/ytdl-ipfs-archiver/internal/pkg/ytdl"
 )
 
@@ -32,23 +35,47 @@ func Run(args []string, stdout io.Writer) (error, int) {
 	if err := flags.Parse(args[1:]); err != nil {
 		return err, errorGeneric
 	}
+	ytdlOptions := flags.Args()
 
+	// Read configuration into configs variable
 	err, configs := config.Parse(confPath)
 	if err != nil {
 		return err, errorConfig
 	}
 
+	// Configuration file is the real default
 	if len(ytdlPath) == 0 {
 		ytdlPath = configs.Binary
 	}
+
+	// Check binary is there
 	err, ytdlPath = ytdl.ParsePath(ytdlPath)
 	if err != nil {
 		return err, errorYTDL
 	}
 
-	fmt.Fprintf(stdout, "Binary at %s\n", ytdlPath)
+	// Get the keys needed for the table
+	var (
+		id       string
+		format   string
+		location string
+	)
+	err, id, format = ytdl.GetIdentifiers(ytdlPath, ytdlOptions)
+	if err != nil {
+		return err, errorYTDL
+	}
 
-	ytdlOptions := flags.Args()
+	err, location = table.Fetch(tablPath, id, format)
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return err, errorTable
+	}
+
+	// TODO This is basically debug stuff
+	fmt.Fprintf(stdout, "Binary at %s\n", ytdlPath)
+	fmt.Fprintf(stdout, "id at %s\n", id)
+	fmt.Fprintf(stdout, "format at %s\n", format)
+	fmt.Fprintf(stdout, "File at %s\n", location)
+
 	for _, name := range ytdlOptions {
 		fmt.Fprintf(stdout, "Hi %s\n", name)
 
