@@ -1,3 +1,6 @@
-*.edn
-*.sqlite
-*.db
+**/*
+!**/*.go
+!**/
+!go.mod
+!go.sum
+!examples/*
