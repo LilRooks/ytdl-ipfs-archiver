@@ -1,8 +1,12 @@
 !_TAG_FILE_SORTED	2	/0=unsorted, 1=sorted, 2=foldcase/
+app	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/errors.go	/^package app$/;"	p	language:Go
 app	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^package app$/;"	p	language:Go
-configPath	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^var configPath string$/;"	v	language:Go
-ErrorCode	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^type ErrorCode struct {$/;"	t	language:Go
-Run	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^func Run(args []string, stdout io.Writer) ErrorCode {$/;"	f	language:Go
-tablePath	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^var tablePath string$/;"	v	language:Go
-ytdlBinary	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^var ytdlBinary string$/;"	v	language:Go
-zeroCode	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^var zeroCode ErrorCode = ErrorCode{Error: nil, Code: 0}$/;"	v	language:Go
+confPath	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^var confPath string$/;"	v	language:Go
+errorConfig	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^	errorConfig$/;"	c	language:Go
+errorGeneric	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^	errorGeneric = iota$/;"	c	language:Go
+errorIPFS	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^	errorIPFS$/;"	c	language:Go
+errorTable	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^	errorTable$/;"	c	language:Go
+errorYTDL	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^	errorYTDL$/;"	c	language:Go
+Run	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^func Run(args []string, stdout io.Writer) (error, int) {$/;"	f	language:Go
+tablPath	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^var tablPath string$/;"	v	language:Go
+ytdlPath	/home/seven/true/build/ytdl-ipfs-archiver/internal/app/run.go	/^var ytdlPath string$/;"	v	language:Go

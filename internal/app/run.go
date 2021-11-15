@@ -4,32 +4,52 @@ import (
 	"flag"
 	"fmt"
 	"io"
+
+	"github.com/LilRooks/ytdl-ipfs-archiver/internal/pkg/config"
 )
 
-// ErrorCode represents the error and code to be returned by the command.
-type ErrorCode struct {
-	Error error
-	Code  int
-}
+var ytdlPath string
+var confPath string
+var tablPath string
 
-var zeroCode ErrorCode = ErrorCode{Error: nil, Code: 0}
-
-var ytdlBinary string
-var configPath string
-var tablePath string
+const (
+	errorGeneric = iota
+	errorConfig
+	errorYTDL
+	errorTable
+	errorIPFS
+)
 
 // Run is the actual code for the command
-func Run(args []string, stdout io.Writer) ErrorCode {
+func Run(args []string, stdout io.Writer) (error, int) {
 	flags := flag.NewFlagSet(args[0], flag.ExitOnError)
 
-	flags.StringVar(&ytdlBinary, "bin", "", "path to the youtube-dl binary (defaults to one in PATH)")
-	flags.StringVar(&configPath, "cfg", "", "path to the configuration file to use")
-	flags.StringVar(&tablePath, "tab", "./table.edn", "path to the table file to use")
+	flags.StringVar(&ytdlPath, "bin", "", "path to the youtube-dl binary (defaults to one in PATH)")
+	flags.StringVar(&confPath, "cfg", "", "path to the configuration file to use")
+	flags.StringVar(&tablPath, "tab", "./table.sqlite", "path to the table file to use")
 
 	if err := flags.Parse(args[1:]); err != nil {
-		return ErrorCode{Error: err, Code: -1}
+		return err, errorGeneric
 	}
+
+	err, configs := config.Parse(confPath)
+	if err != nil {
+		return err, errorConfig
+	}
+
+	if len(ytdlPath) == 0 {
+		ytdlPath = configs.Binary
+	}
+	if err := ytdl.CheckBinary(ytdlPath); err != nil {
+		return err, errorYTDL
+	}
+
+	fmt.Fprintf(stdout, "Binary at %s\n", ytdlPath)
+
 	ytdlOptions := flags.Args()
-	fmt.Fprintf(stdout, "Hi %x", len(ytdlOptions))
-	return zeroCode
+	for _, name := range ytdlOptions {
+		fmt.Fprintf(stdout, "Hi %s\n", name)
+
+	}
+	return nil, 0
 }
