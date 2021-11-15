@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/LilRooks/ytdl-ipfs-archiver/internal/app"
+	"github.com/LilRooks/ytdl-ipfs-archiver/pkg/internal/app"
 )
 
 func main() {
