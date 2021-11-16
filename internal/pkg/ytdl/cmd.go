@@ -1,6 +1,7 @@
 package ytdl
 
 import (
+	"fmt"
 	"os/exec"
 	"unicode/utf8"
 )
@@ -12,17 +13,29 @@ func GetIdentifiers(binary string, args []string) (error, string, string) {
 		return err, "", ""
 	}
 	err, format := ReadCommand(binary, append(args, "--get-format"))
-	return err, id, format
+	if err != nil {
+		return err, "", ""
+	}
+	fmt.Printf("[ytdl] Grabbed identifiers '%s' and '%s'\n", id, format)
+	return nil, id, format
 }
 
 func GetFilename(binary string, args []string) (error, string) {
 	err, filename := ReadCommand(binary, append(args, "--get-filename"))
-	return err, filename
+	if err != nil {
+		return err, ""
+	}
+	fmt.Println("[ytdl] Got filename", filename)
+	return nil, filename
 }
 
 func Download(binary string, args []string) error {
 	err, _ := ReadCommand(binary, args)
-	return err
+	if err != nil {
+		return err
+	}
+	fmt.Println("[ytdl] file saved!")
+	return nil
 }
 
 func ReadCommand(binary string, args []string) (error, string) {

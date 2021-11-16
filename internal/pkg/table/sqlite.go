@@ -22,6 +22,7 @@ func OpenDB(filepath string) (error, *sql.DB) {
 	if db == nil {
 		return errors.New("db nil"), nil
 	}
+	fmt.Printf("[sqlite] Opening '%s'\n", filepath)
 	return nil, db
 }
 
@@ -44,12 +45,13 @@ func Fetch(db *sql.DB, id string, format string) (error, string) {
 			return err, ""
 		}
 	}
-	fmt.Printf("[sqlite] fetched %s via %s, %s\n", out, id, format)
+	fmt.Printf("[sqlite] fetched \"%s\" via \"%s\", \"%s\"\n", out, id, format)
 	return nil, out
 }
 
 // Store attempts to insert an ipfs address pointing to a file with keys being id and format given
 func Store(db *sql.DB, id string, format string, location string) error {
+	fmt.Printf("[sqlite] attempting to insert (\"%s\", \"%s\", \"%s\")...\n", id, format, location)
 	_, err := db.Exec(fmt.Sprintf(`
 	INSERT INTO ipfs
 	VALUES ("%s", "%s", "%s");`, id, format, location))
@@ -58,6 +60,7 @@ func Store(db *sql.DB, id string, format string, location string) error {
 
 // InitializeTable creates an initialized table at path given
 func InitializeTable(db *sql.DB) error {
+	fmt.Printf("[sqlite] database doesn't exist, initializing...\n")
 	_, err := db.Exec(`
 	CREATE TABLE ipfs (
 		id TEXT NOT NULL,

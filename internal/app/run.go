@@ -5,10 +5,12 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"os"
+	"strings"
+
 	"io"
 	"io/fs"
 	"io/ioutil"
-	"os"
 
 	"github.com/LilRooks/ytdl-ipfs-archiver/internal/pkg/config"
 	"github.com/LilRooks/ytdl-ipfs-archiver/internal/pkg/table"
@@ -54,6 +56,7 @@ func Run(args []string, stdout io.Writer) (error, int) {
 	if len(ytdlPath) == 0 {
 		ytdlPath = configs.Binary
 	}
+	removeYTDL := (ytdlPath == "embedded")
 
 	// Check binary is there
 	err, ytdlPath = ytdl.ParsePath(ytdlPath)
@@ -61,6 +64,9 @@ func Run(args []string, stdout io.Writer) (error, int) {
 		return err, errorYTDL
 	}
 
+	if removeYTDL {
+		defer os.Remove(ytdlPath)
+	}
 	// Get the keys needed for the table
 	var (
 		filename string
@@ -87,7 +93,6 @@ func Run(args []string, stdout io.Writer) (error, int) {
 
 	// Only initialized if the file did not originally exist
 	if errors.Is(errNotExist, os.ErrNotExist) {
-		fmt.Printf("[sqlite] %s doesn't exist, initializing...\n", tablPath)
 		errInit := table.InitializeTable(db)
 		if errInit != nil {
 			return errInit, errorTable
@@ -99,11 +104,11 @@ func Run(args []string, stdout io.Writer) (error, int) {
 		return err, errorTable
 	}
 
-	cid, err := cid.Decode(location)
-	if err != nil {
-		return err, errorIPFS
-	}
+	cid, _ := cid.Decode(location)
 
+	if val, ok := os.LookupEnv("TOKEN"); ok {
+		configs.Token = val
+	}
 	c, _ := w3s.NewClient(w3s.WithToken(configs.Token))
 	if len(location) == 0 {
 		err := ytdl.Download(ytdlPath, ytdlOptions)
@@ -113,9 +118,24 @@ func Run(args []string, stdout io.Writer) (error, int) {
 		if configs.Token == "" {
 			return err, errorIPFS
 		}
-		f, _ := os.Open(filename)
+		f, err := os.Open(filename)
+		if err != nil {
+			if !errors.Is(err, os.ErrNotExist) {
+				return err, errorYTDL
+			} else {
+				// Really kinda a hacky workaround to "WARNING: Requested formats are incompatible for merge and will be merged into mkv."
+				spl := strings.Split(filename, ".")
+				spl = append(spl[:len(spl)-1], "mkv")
+				filename = strings.Join(spl, ".")
+				f, _ = os.Open(filename)
+			}
+		}
 
-		cid, _ := c.Put(context.Background(), f)
+		fmt.Printf("[ipfs] attempting to put file '%s'\n", filename)
+		cid, err = c.Put(context.Background(), f)
+		if err != nil {
+			return err, errorIPFS
+		}
 		location = cid.String()
 		err = table.Store(db, id, format, location)
 		if err != nil {

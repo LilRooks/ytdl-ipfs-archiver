@@ -1,1 +1,2 @@
-{:binary "/path/to/custom/youtube-dl"}
+{:binary "/path/to/custom/youtube-dl",
+ :token "web3.storege token goes here"}
