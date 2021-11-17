@@ -1,45 +1,54 @@
 package ytdl
 
 import (
-	"fmt"
+	"log"
 	"os/exec"
+	"strings"
 	"unicode/utf8"
 )
 
 // GetIdentifiers gets the identifying characteristics of the file to be downloaded
-func GetIdentifiers(binary string, args []string) (error, string, string) {
-	err, id := ReadCommand(binary, append(args, "--get-id"))
+func GetIdentifiers(logger *log.Logger, binary string, args []string) (error, string, string) {
+	logger.SetPrefix("[ytdl] ")
+	logger.Println("Getting identifiers...")
+	err, id := readCommand(binary, append(args, "--get-id"))
 	if err != nil {
 		return err, "", ""
 	}
-	err, format := ReadCommand(binary, append(args, "--get-format"))
+	err, format := readCommand(binary, append(args, "--get-format"))
 	if err != nil {
 		return err, "", ""
 	}
-	fmt.Printf("[ytdl] Grabbed identifiers '%s' and '%s'\n", id, format)
+	logger.Printf("Grabbed identifiers '%s' and '%s'\n", id, format)
+
 	return nil, id, format
 }
 
-func GetFilename(binary string, args []string) (error, string) {
-	err, filename := ReadCommand(binary, append(args, "--get-filename"))
+func GetFilename(logger *log.Logger, binary string, args []string) (error, string) {
+	logger.SetPrefix("[ytdl] ")
+	logger.Println("Getting filename")
+	err, filename := readCommand(binary, append(args, "--get-filename"))
 	if err != nil {
 		return err, ""
 	}
-	fmt.Println("[ytdl] Got filename", filename)
+	spl := strings.Split(filename, ".")
+	filename = strings.Join(spl[:len(spl)-1], ".")
+	logger.Printf("Got filename %s\n", filename)
 	return nil, filename
 }
 
-func Download(binary string, args []string) error {
-	err, _ := ReadCommand(binary, args)
+func Download(logger *log.Logger, binary string, args []string) error {
+	logger.SetPrefix("[ytdl] ")
+	err, _ := readCommand(binary, args)
 	if err != nil {
 		return err
 	}
-	fmt.Println("[ytdl] file saved!")
+	logger.Println("File saved!")
 	return nil
 }
 
-func ReadCommand(binary string, args []string) (error, string) {
-	out, err := exec.Command(binary, args...).Output()
+func readCommand(binary string, args []string) (error, string) {
+	out, err := exec.Command(binary, append(args, "-o", "%(id)s -- %(format_id)s.%(ext)s")...).Output()
 	if err != nil {
 		return err, ""
 	}
