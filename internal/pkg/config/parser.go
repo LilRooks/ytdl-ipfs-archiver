@@ -6,21 +6,22 @@ import (
 	"olympos.io/encoding/edn"
 )
 
-type ConfigSet struct {
+// ConfSet is a struct representing the configuration
+type ConfSet struct {
 	Binary string
 	Token  string
 }
 
 // Parse parses the configuration given at path.
-func Parse(path string) (error, ConfigSet) {
+func Parse(path string) (ConfSet, error) {
 	if len(path) == 0 {
-		return nil, ConfigSet{}
+		return ConfSet{}, nil
 	}
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		return err, ConfigSet{}
+		return ConfSet{}, err
 	}
-	var ret ConfigSet
+	var ret ConfSet
 	err = edn.Unmarshal(data, &ret)
-	return nil, ret
+	return ret, nil
 }

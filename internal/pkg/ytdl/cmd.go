@@ -8,38 +8,40 @@ import (
 )
 
 // GetIdentifiers gets the identifying characteristics of the file to be downloaded
-func GetIdentifiers(logger *log.Logger, binary string, args []string) (error, string, string) {
+func GetIdentifiers(logger *log.Logger, binary string, args []string) (string, string, error) {
 	logger.SetPrefix("[ytdl] ")
 	logger.Println("Getting identifiers...")
-	err, id := readCommand(binary, append(args, "--get-id"))
+	id, err := readCommand(binary, append(args, "--get-id"))
 	if err != nil {
-		return err, "", ""
+		return "", "", err
 	}
-	err, format := readCommand(binary, append(args, "--get-format"))
+	format, err := readCommand(binary, append(args, "--get-format"))
 	if err != nil {
-		return err, "", ""
+		return "", "", err
 	}
 	logger.Printf("Grabbed identifiers '%s' and '%s'\n", id, format)
 
-	return nil, id, format
+	return id, format, nil
 }
 
-func GetFilename(logger *log.Logger, binary string, args []string) (error, string) {
+// GetFilename determines the filename to write to
+func GetFilename(logger *log.Logger, binary string, args []string) (string, error) {
 	logger.SetPrefix("[ytdl] ")
 	logger.Println("Getting filename")
-	err, filename := readCommand(binary, append(args, "--get-filename"))
+	filename, err := readCommand(binary, append(args, "--get-filename"))
 	if err != nil {
-		return err, ""
+		return "", err
 	}
 	spl := strings.Split(filename, ".")
 	filename = strings.Join(spl[:len(spl)-1], ".")
 	logger.Printf("Got filename %s\n", filename)
-	return nil, filename
+	return filename, nil
 }
 
+// Download executes the assumed download file
 func Download(logger *log.Logger, binary string, args []string) error {
 	logger.SetPrefix("[ytdl] ")
-	err, _ := readCommand(binary, args)
+	_, err := readCommand(binary, args)
 	if err != nil {
 		return err
 	}
@@ -47,10 +49,10 @@ func Download(logger *log.Logger, binary string, args []string) error {
 	return nil
 }
 
-func readCommand(binary string, args []string) (error, string) {
+func readCommand(binary string, args []string) (string, error) {
 	out, err := exec.Command(binary, append(args, "-o", "%(id)s -- %(format_id)s.%(ext)s")...).Output()
 	if err != nil {
-		return err, ""
+		return "", err
 	}
 
 	strOut := string(out)
@@ -58,5 +60,5 @@ func readCommand(binary string, args []string) (error, string) {
 	if r == utf8.RuneError && (size == 0 || size == 1) {
 		size = 0
 	}
-	return nil, string(out[:len(strOut)-size])
+	return string(out[:len(strOut)-size]), nil
 }

@@ -51,7 +51,7 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) (int, error) {
 	ytdlOptions := flags.Args()
 
 	// Read configuration into configs variable
-	err, configs := config.Parse(confPath)
+	configs, err := config.Parse(confPath)
 	if err != nil {
 		return errorConfig, err
 	}
@@ -76,7 +76,7 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) (int, error) {
 	)
 	_, errTableExist := os.Stat(tablPath)
 
-	err, db := table.OpenDB(tablPath)
+	db, err := table.OpenDB(tablPath)
 	if err != nil {
 		return errorTable, err
 	}
@@ -90,12 +90,12 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) (int, error) {
 		}
 	}
 
-	err, id, format = ytdl.GetIdentifiers(logger, ytdlPath, ytdlOptions)
+	id, format, err = ytdl.GetIdentifiers(logger, ytdlPath, ytdlOptions)
 	if err != nil {
 		return errorYTDL, err
 	}
 
-	err, location = table.Fetch(db, id, format)
+	location, err = table.Fetch(db, id, format)
 	if err != nil {
 		return errorTable, err
 	}
@@ -116,7 +116,7 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) (int, error) {
 			return errorYTDL, err
 		}
 
-		err, filename = ytdl.GetFilename(logger, ytdlPath, ytdlOptions)
+		filename, err = ytdl.GetFilename(logger, ytdlPath, ytdlOptions)
 		if err != nil {
 			return errorYTDL, err
 		}

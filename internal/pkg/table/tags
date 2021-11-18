@@ -1,7 +1,0 @@
-!_TAG_FILE_SORTED	2	/0=unsorted, 1=sorted, 2=foldcase/
-Fetch	/home/seven/true/build/ytdl-ipfs-archiver/internal/pkg/table/sqlite.go	/^func Fetch(db *sql.DB, id string, format string) (error, string) {$/;"	f	language:Go
-FileItem	/home/seven/true/build/ytdl-ipfs-archiver/internal/pkg/table/sqlite.go	/^type FileItem struct {$/;"	t	language:Go
-InitializeTable	/home/seven/true/build/ytdl-ipfs-archiver/internal/pkg/table/sqlite.go	/^func InitializeTable(db *sql.DB) error {$/;"	f	language:Go
-OpenDB	/home/seven/true/build/ytdl-ipfs-archiver/internal/pkg/table/sqlite.go	/^func OpenDB(filepath string) (error, *sql.DB) {$/;"	f	language:Go
-Store	/home/seven/true/build/ytdl-ipfs-archiver/internal/pkg/table/sqlite.go	/^func Store(db *sql.DB, id string, format string, location string) error {$/;"	f	language:Go
-table	/home/seven/true/build/ytdl-ipfs-archiver/internal/pkg/table/sqlite.go	/^package table$/;"	p	language:Go
