@@ -1,7 +1,6 @@
 package app
 
 import (
-	"context"
 	"errors"
 	"flag"
 	"log"
@@ -9,15 +8,12 @@ import (
 	"path/filepath"
 
 	"io"
-	"io/fs"
-	"io/ioutil"
 
 	"github.com/LilRooks/ytdl-ipfs-archiver/internal/pkg/config"
 	"github.com/LilRooks/ytdl-ipfs-archiver/internal/pkg/ipfs"
 	"github.com/LilRooks/ytdl-ipfs-archiver/internal/pkg/table"
 	"github.com/LilRooks/ytdl-ipfs-archiver/internal/pkg/ytdl"
 
-	"github.com/ipfs/go-cid"
 	"github.com/web3-storage/go-w3s-client"
 )
 
@@ -25,6 +21,8 @@ var (
 	ytdlPath string
 	confPath string
 	tablPath string
+	pinAddDB bool
+	remoteDB bool
 )
 
 const (
@@ -43,6 +41,8 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) (int, error) {
 	flags.StringVar(&ytdlPath, "bin", "", "path to the youtube-dl binary (defaults to one in PATH)")
 	flags.StringVar(&confPath, "cfg", "", "path to the configuration file to use")
 	flags.StringVar(&tablPath, "tab", "./table.sqlite", "path to the table file to use")
+	flags.BoolVar(&pinAddDB, "pin", false, "pin the database to the local daemon")
+	flags.BoolVar(&remoteDB, "rdb", false, "pulls remote database to `pwd`")
 
 	err := flags.Parse(args[1:])
 	if err != nil {
@@ -74,6 +74,14 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) (int, error) {
 		format   string
 		location string
 	)
+	c, err := w3s.NewClient(w3s.WithToken(configs.Token))
+	if err != nil {
+		return errorConfig, err
+	}
+	tablPath, err = ipfs.Fetch(c, tablPath)
+	if err != nil {
+		return errorIPFS, err
+	}
 	_, errTableExist := os.Stat(tablPath)
 
 	db, err := table.OpenDB(tablPath)
@@ -82,12 +90,13 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) (int, error) {
 	}
 	defer db.Close()
 
-	// Only initialized if the file did not originally exist
+	// Only initialized if the file did not originally exist and is local only
 	if errors.Is(errTableExist, os.ErrNotExist) {
 		err := table.InitializeTable(db)
 		if err != nil {
 			return errorTable, err
 		}
+
 	}
 
 	id, format, err = ytdl.GetIdentifiers(logger, ytdlPath, ytdlOptions)
@@ -100,14 +109,8 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) (int, error) {
 		return errorTable, err
 	}
 
-	cid, _ := cid.Decode(location)
-
 	if val, ok := os.LookupEnv("TOKEN"); ok {
 		configs.Token = val
-	}
-	c, err := w3s.NewClient(w3s.WithToken(configs.Token))
-	if err != nil {
-		return errorConfig, err
 	}
 
 	if len(location) == 0 {
@@ -136,31 +139,10 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) (int, error) {
 			return errorIPFS, err
 		}
 	} else {
-		logger.SetPrefix("[w3s] ")
-		logger.Printf("Getting %s\n", location)
-		res, _ := c.Get(context.Background(), cid)
-
-		// Download directory contents
-		f, fsys, _ := res.Files()
-		if d, ok := f.(fs.ReadDirFile); ok {
-			ents, _ := d.ReadDir(0)
-			for _, ent := range ents {
-				filename = ent.Name()
-				file, err := fsys.Open("/" + ent.Name())
-				if err != nil {
-					return errorIPFS, err
-				}
-
-				data, err := ioutil.ReadAll(file)
-				if err != nil {
-					return errorIPFS, err
-				}
-
-				err = ioutil.WriteFile(ent.Name(), data, 0755)
-				if err != nil {
-					return errorIPFS, err
-				}
-			}
+		var err error
+		filename, err = ipfs.Fetch(c, location)
+		if err != nil {
+			return errorIPFS, err
 		}
 	}
 
