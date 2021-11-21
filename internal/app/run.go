@@ -78,9 +78,11 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) (int, error) {
 	if err != nil {
 		return errorConfig, err
 	}
-	tablPath, err = ipfs.Fetch(c, tablPath)
-	if err != nil {
-		return errorIPFS, err
+	if remoteDB {
+		tablPath, err = ipfs.Fetch(c, tablPath)
+		if err != nil {
+			return errorIPFS, err
+		}
 	}
 	_, errTableExist := os.Stat(tablPath)
 
